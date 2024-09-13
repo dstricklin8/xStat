@@ -103,17 +103,13 @@ pred_accuracy <- preds %>%
   accuracy(tb, .pred_class)
 pred_accuracy # 0.718
 
-# ROC
-roc_df <- xSLG_rf_fit %>% 
-  predict(xSLG_test %>% select(-tb), type = "prob") %>% 
-  bind_cols(xSLG_test %>% select(tb))
-
-roc_df %>% 
+# ROC_AUC
+preds %>% 
   roc_curve(tb, c(.pred_0, .pred_1, .pred_2, .pred_3, .pred_4)) %>% 
   autoplot()
 
-roc_df %>% 
-  roc_auc(tb, c(.pred_0, .pred_1, .pred_2, .pred_3, .pred_4)) # 0.822
+preds %>% 
+  roc_auc(tb, c(.pred_0, .pred_1, .pred_2, .pred_3, .pred_4))
 
 # Confusion Matrix
 preds %>% 
