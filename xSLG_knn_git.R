@@ -165,9 +165,6 @@ xSLG_knn_metrics <- pivot_wider(knn_metrics, values_from = .estimate, names_from
   mutate(model = "KNN") %>% 
   select(model, rsq, rmse, mase, mae)
 xSLG_knn_metrics
-# model   rsq   rmse  mase    mae
-# <chr> <dbl>  <dbl> <dbl>  <dbl>
-# KNN   0.887 0.0328 0.562 0.0282
 
 # save(xSLG_bt_metrics_a, file = "xSLG/results/xSLG_bt_metrics_a.rda")
 
