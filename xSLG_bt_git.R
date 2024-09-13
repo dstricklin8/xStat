@@ -25,7 +25,7 @@ load("Northwestern xStats/nu_data/bip_nu_df.rda")
 load("Northwestern xStats/nu_data/df_24.rda")
 load("Northwestern xStats/nu_data/nu_24.rda")
 
-xSLG_split <- initial_split(bip_train_df, prop = 0.9, strata = tb)
+xSLG_split <- initial_split(bip_train_df, prop = 0.8, strata = tb)
 xSLG_train <- training(xSLG_split)
 xSLG_test <- testing(xSLG_split)
 
@@ -156,8 +156,7 @@ nu_24_preds_pa_100 <- nu_24_preds %>%
     player_id = row_number()
   )
 
-# Calculating Metrics
-## Creating metric set
+# Calculating Final Metrics
 xSLG_metrics <- metric_set(rsq, rmse, mase, mae)
 
 bt_metrics_a <- xSLG_metrics(nu_24_preds_pa_100, truth = SLG, estimate = xSLG)
@@ -168,9 +167,6 @@ xSLG_bt_metrics_a <- pivot_wider(bt_metrics_a, values_from = .estimate, names_fr
   select(model, rsq, rmse, mase, mae)
 
 xSLG_bt_metrics_a
-# model     rsq   rmse  mase    mae
-# <chr>   <dbl>  <dbl> <dbl>  <dbl>
-# XGBoost 0.788 0.0768 0.896 0.0663
 
 ggplot(nu_24_preds_pa_100, aes(SLG, xSLG, label = player_id)) +
   geom_smooth(se = F, linetype = 2, color = "indianred", method = "lm") +
@@ -186,7 +182,5 @@ ggplot(nu_24_preds_pa_100, aes(SLG, xSLG, label = player_id)) +
   ) +
   theme_minimal() +
   geom_label_repel(size = 4, colour = "#582c83")
-
-
 
 
