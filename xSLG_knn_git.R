@@ -103,17 +103,13 @@ pred_accuracy <- preds %>%
   accuracy(tb, .pred_class)
 pred_accuracy # 0.713
 
-# ROC
-roc_df <- xSLG_knn_fit %>% 
-  predict(xSLG_test %>% select(-tb), type = "prob") %>% 
-  bind_cols(xSLG_test %>% select(tb))
-
-roc_df %>% 
+# ROC_AUC
+preds %>% 
   roc_curve(tb, c(.pred_0, .pred_1, .pred_2, .pred_3, .pred_4)) %>% 
   autoplot()
 
-roc_df %>% 
-  roc_auc(tb, c(.pred_0, .pred_1, .pred_2, .pred_3, .pred_4)) # 0.777
+preds %>% 
+  roc_auc(tb, c(.pred_0, .pred_1, .pred_2, .pred_3, .pred_4))
 
 # Confusion Matrix
 preds %>% 
@@ -129,15 +125,14 @@ nu_preds_class <- xSLG_knn_fit %>%
 
 nu_bip_24 <- cbind(bip_nu_df, nu_preds_probs, nu_preds_class) %>% 
   mutate(
-    xSLG = .pred_0 * 0 + .pred_1 * 0.833 + .pred_2 * 1.244 + .pred_3 * 1.569 + .pred_4 * 2.004
+    xSLG = .pred_0 * 0 + .pred_1 * 1 + .pred_2 * 2 + .pred_3 * 3 + .pred_4 * 4
   )
 
 df_2024 <- left_join(nu_24, nu_bip_24) %>% 
   mutate(
     xSLG = case_when(
-      KorBB == "Walk" ~ 0.696,
-      PitchCall == "HitByPitch" ~ 0.726,
-      KorBB %in% c("Strikeout") ~  0,
+      KorBB == "Strikeout" ~ 0,
+      PlayResult == 'Sacrifice' ~ NA,
       TRUE ~ xSLG
     )
   ) %>% 
@@ -146,15 +141,15 @@ df_2024 <- left_join(nu_24, nu_bip_24) %>%
 nu_24_preds <- df_2024 %>% 
   group_by(Batter) %>% 
   summarise(
-    PA = n(),
-    SLG = mean(woba, na.rm = TRUE),
+    AB = n(),
+    SLG = mean(total_bases_code, na.rm = TRUE),
     xSLG = mean(xSLG, na.rm = TRUE)
   ) %>% 
   arrange(-xSLG) %>% 
   ungroup()
 
 nu_24_preds_pa_100 <- nu_24_preds %>% 
-  filter(PA >= 100) %>% 
+  filter(AB >= 100) %>% 
   mutate(
     player_id = row_number()
   )
@@ -184,7 +179,7 @@ ggplot(nu_24_preds_pa_100, aes(SLG, xSLG, label = player_id)) +
   labs(
     x = "SLG",
     y = "xSLG",
-    title = "Northwestern Baseball xSLG vs. wOBA",
+    title = "Northwestern Baseball xSLG vs. SLG",
     subtitle = "2024 Season | Minimum 100 PAs | KNN Model",
     caption = "Data: TrackMan"
   ) +
